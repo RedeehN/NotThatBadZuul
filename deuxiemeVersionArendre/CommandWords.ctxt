@@ -1,13 +1,13 @@
 #BlueJ class context
 comment0.target=CommandWords
-comment0.text=\r\n\ This\ class\ is\ part\ of\ the\ "World\ of\ Zuul"\ application.\ \r\n\ "World\ of\ Zuul"\ is\ a\ very\ simple,\ text\ based\ adventure\ game.\ \ \r\n\ \r\n\ This\ class\ holds\ an\ enumeration\ table\ of\ all\ command\ words\ known\ to\ the\ game.\r\n\ It\ is\ used\ to\ recognise\ commands\ as\ they\ are\ typed\ in.\r\n\r\n\ @author\ \ Michael\ Kolling\ and\ David\ J.\ Barnes\ +\ D.Bureau\r\n\ @version\ 2008.03.30\ +\ 2013.09.15\r\n
+comment0.text=\n\ This\ class\ is\ part\ of\ the\ "World\ of\ Zuul"\ application.\ \n\ "World\ of\ Zuul"\ is\ a\ very\ simple,\ text\ based\ adventure\ game.\ \ \n\ \n\ This\ class\ holds\ an\ enumeration\ table\ of\ all\ command\ words\ known\ to\ the\ game.\n\ It\ is\ used\ to\ recognise\ commands\ as\ they\ are\ typed\ in.\n\n\ @author\ \ Michael\ Kolling\ and\ David\ J.\ Barnes\ +\ D.Bureau\n\ @version\ 2008.03.30\ +\ 2013.09.15\n
 comment1.params=
 comment1.target=CommandWords()
-comment1.text=\r\n\ Constructeur\ par\ defaut\r\n
+comment1.text=\n\ Constructeur\ par\ defaut\n
 comment2.params=
 comment2.target=java.lang.String\ getCommandList()
-comment2.text=\r\n\ Affiche\ les\ commandes\ valides\r\n
+comment2.text=\n\ Affiche\ les\ commandes\ valides\n
 comment3.params=pString
 comment3.target=boolean\ isCommand(java.lang.String)
-comment3.text=\r\n\ Verifie\ si\ une\ String\ donnee\ fait\ partie\ des\ commandes\ valides.\ \r\n\ @param\ pString\ la\ String\ a\ tester\r\n\ @return\ true\ si\ pString\ est\ une\ comande\ valide,\ false\ sinon\r\n
+comment3.text=\n\ Verifie\ si\ une\ String\ donnee\ fait\ partie\ des\ commandes\ valides.\ \n\ @param\ pString\ la\ String\ a\ tester\n\ @return\ true\ si\ pString\ est\ une\ comande\ valide,\ false\ sinon\n
 numComments=4

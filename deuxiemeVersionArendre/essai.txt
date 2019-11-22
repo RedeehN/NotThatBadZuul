@@ -1,0 +1,9 @@
+go
+go north
+go south
+go east
+back
+back
+look
+help
+go south

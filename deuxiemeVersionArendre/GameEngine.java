@@ -12,13 +12,18 @@ package deuxiemeVersionArendre;
  */
 
 import java.util.HashMap;
+import java.util.Stack;
+import java.io.File;
+import java.util.Scanner;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
 
 public class GameEngine
 {
     private Parser        aParser;
     private Room          aCurrentRoom;
     private UserInterface aGui;
-
+    private Stack<Room>   aAncienneRoom;
     private HashMap<String,Room> aEnsembleRoom;
 
     /**
@@ -29,6 +34,7 @@ public class GameEngine
 
         this.aParser = new Parser();
         this.aEnsembleRoom = new HashMap<String,Room>();
+        this.aAncienneRoom = new Stack<Room>();
         this.createRooms();
     }
 
@@ -39,7 +45,7 @@ public class GameEngine
     }
 
     /**
-     * Print out the opening message for the player.
+     * Message de démarrage du jeu.
      */
     private void printWelcome()
     {
@@ -55,16 +61,16 @@ public class GameEngine
     }
 
     /**
-     * Create all the rooms and link their exits together.
+     * Procedure qui initialise des Rooms et les lient entre elles.
      */
     private void createRooms()
     {
-        Room vRestaurantDebut = new Room("dans le restaurant d'un chef cuisinier ou vous allez vous faire cuisiner","Images/interieurRestaurant.png");
-        Room vRueJaponaiseHub = new Room("dans la rue principal : le hub","Images/hub.png");
-        Room vRueJaponaise2 = new Room("dans une rue parallele a la rue principal","Images/Rue2PartieEast.png");
+        Room vRestaurantDebut = new Room("dans le restaurant d'un chef cuisinier ou vous allez vous faire cuisiner","deuxiemeVersionArendre/Images/interieurRestaurant.png");
+        Room vRueJaponaiseHub = new Room("dans la rue principal : le hub","deuxiemeVersionArendre/Images/hub.png");
+        Room vRueJaponaise2 = new Room("dans une rue parallele a la rue principal","deuxiemeVersionArendre/Images/Rue2PartieEast.png");
         Room vRueJaponaise3 = new Room("work in progress","images/rue4.png");
-        Room vRueJaponaise4 = new Room("dans une rue parallele a la rue principal direction la plage","Images/TEST1.png");
-        Room vMaisonItemRue2 = new Room("dans la maison du senpai","Images/test2.gif");
+        Room vRueJaponaise4 = new Room("dans une rue parallele a la rue principal direction la plage","deuxiemeVersionArendre/Images/TEST1.png");
+        Room vMaisonItemRue2 = new Room("dans la maison du senpai","deuxiemeVersionArendre/Images/test2.gif");
         //positionner les sorties pour créer le "réseau"
         vRestaurantDebut.setExits("south",vRueJaponaiseHub);
 
@@ -98,6 +104,7 @@ public class GameEngine
 
         //initialiser le lieu courant 
         this.aCurrentRoom = vRestaurantDebut;
+        //this.aAncienneRoom = this.aCurrentRoom;
     }
 
     /**
@@ -124,6 +131,10 @@ public class GameEngine
             this.look(vCommand);
         else if ( vCommandWord.equals( "eat" ) )
             this.eat();
+        else if ( vCommandWord.equals( "back" ) )
+            this.back(vCommand);
+        else if ( vCommandWord.equals( "test" ) )
+            this.test(vCommand);
         else if ( vCommandWord.equals( "quit" ) ) {
             if ( vCommand.hasSecondWord() )
                 this.aGui.println( "Quit what?" );
@@ -170,8 +181,42 @@ public class GameEngine
         if ( vNextRoom == null )
             this.aGui.println( "Impossible d'aller dans cette direction" );
         else {
+            this.aAncienneRoom.add(this.aCurrentRoom);
             this.aCurrentRoom = vNextRoom;
             printLocationInfo();
+            if ( this.aCurrentRoom.getImageName() != null )
+                this.aGui.showImage( this.aCurrentRoom.getImageName() );
+        }
+    }
+
+    private void test(final Command pCommand){
+        if (pCommand.hasSecondWord()){
+            try {
+                Scanner vSr = new Scanner(new File("deuxiemeVersionArendre/"+pCommand.getSecondWord()+".txt"));
+                //PrintWriter pPw = new PrintWriter("deuxiemeVersionArendre/"+pCommand.getSecondWord()+".txt");
+                String line;
+                while(vSr.hasNextLine()){
+                    line = vSr.nextLine();
+                    this.interpretCommand(line);
+                }
+            }catch(FileNotFoundException pExc){
+                this.aGui.println("le fichier n'a pas pu etre ouvert ou lu");
+            }
+        }
+        else {
+            this.aGui.println("quel fichier ?");
+        }
+
+    }
+
+    private void back(final Command pCommand){
+        if (pCommand.hasSecondWord())
+            this.aGui.println("Retourner ou ?");
+        else if(this.aAncienneRoom.empty())
+            this.aGui.println("Vous étes au début !! ");
+        else {
+            this.aCurrentRoom = this.aAncienneRoom.pop();
+            this.printLocationInfo();
             if ( this.aCurrentRoom.getImageName() != null )
                 this.aGui.showImage( this.aCurrentRoom.getImageName() );
         }
