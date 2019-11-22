@@ -1,0 +1,23 @@
+#BlueJ class context
+comment0.target=Game
+comment1.params=
+comment1.target=Game()
+comment2.params=
+comment2.target=void\ play()
+comment3.params=
+comment3.target=void\ createRooms()
+comment4.params=pCommande
+comment4.target=void\ goRoom(Command)
+comment5.params=
+comment5.target=void\ printWelcome()
+comment5.text=\r\n\ message\ de\ d\u00E9but\r\n\ \r\n
+comment6.params=
+comment6.target=void\ printHelp()
+comment6.text=\r\n\ affiche\ l'aide\ \r\n
+comment7.params=pCommand
+comment7.target=boolean\ quit(Command)
+comment7.text=\r\n\ quit\ le\ jeu\r\n
+comment8.params=pCommand
+comment8.target=boolean\ processCommand(Command)
+comment8.text=\r\n\ appeler\ la\ bonne\ m\u00E9thode\ en\ fonction\ de\ la\ commande\ pass\u00E9e\ en\ param\u00E8tre\r\n
+numComments=9
