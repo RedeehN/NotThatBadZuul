@@ -46,7 +46,7 @@ public class Item
         return this.aDescription;
     }
 
-    private int getGainVie(){
+    public int getGainVie(){
         return this.aGainVie;
     }
 }

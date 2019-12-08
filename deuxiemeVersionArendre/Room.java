@@ -11,8 +11,7 @@ public class Room
     private String                  aDescription;
     private HashMap<String, Room>   aExits;
     private String                  aImageName;
-    //    private Item                    aItem;
-    private ArrayList<Item>         aItems;
+    private ItemList         aItems;
 
     /**
      * Constructeur class Room
@@ -23,7 +22,7 @@ public class Room
         this.aDescription=pDescription;
         this.aImageName = pImage;
         aExits = new HashMap<String,Room>();
-        aItems = new ArrayList<Item>();
+        aItems = new ItemList();
     }
 
     /**
@@ -79,17 +78,7 @@ public class Room
      */
     public String getLongDescription()
     {
-        if (this.aItems.isEmpty())
-            return "Vous êtes " + this.aDescription + ".\n" + this.getExitString() + "\nItems : Aucun item ici ";
-        else 
-        {   
-            String vItemDescription = "";
-
-            for(Item item : this.aItems){
-                vItemDescription += item.getCourteItemDescription()+"\n";
-            }
-            return "Vous êtes " + this.aDescription + ".\n" + this.getExitString() + "\n" + vItemDescription;
-        }
+        return "Vous êtes " + this.aDescription + ".\n" + this.getExitString() + "\n" + this.aItems.getItemsListNames();
     }
 
     /**
@@ -100,24 +89,32 @@ public class Room
         return this.aImageName;
     }
 
+    public Item getItem(final String pItemName){
+        return this.aItems.getItem(pItemName);
+    }
+
+    public void removeItem(final String pItemName){
+        this.aItems.removeItem(pItemName);
+    }
+
     /*
     private void setItem(final String pId, final String pItemName, final double pPoids, final String pDescription, final int pGainVie){
     this.aItem = new Item(pId, pItemName,pPoids,pDescription,pGainVie);
     }*/
 
     public void addItem(final String pId, final String pItemName, final double pPoids, final String pDescription, final int pGainVie){
-        this.aItems.add(new Item(pId, pItemName,pPoids,pDescription,pGainVie));
+        this.aItems.addItem(new Item(pId, pItemName,pPoids,pDescription,pGainVie));
+    }
+
+    public void addItem(final Item pItem){
+        this.aItems.addItem(pItem);
     }
 
     public String getItemDescription(String pNomItem){
-        if (this.aItems.isEmpty()) return "Aucun objet est présent dans cette piece";
+        if (!this.aItems.contient(pNomItem)) return "Cet Item n'est pas présent dans cette piece";
         else {
-            String vItemDescription = "";
-            for (Item item : this.aItems){
-                if (pNomItem.equalsIgnoreCase(item.getId()))
-                    return item.getLongItemDescription();
-            }
-            return "Cet Item n'est pas présent dans cette piece ";
+            return this.aItems.getItem(pNomItem).getCourteItemDescription();
         }
     }
+
 } // Room

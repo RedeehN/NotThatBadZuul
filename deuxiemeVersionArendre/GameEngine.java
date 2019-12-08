@@ -1,4 +1,5 @@
 package deuxiemeVersionArendre;
+
 /**
  *  This class is part of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.
@@ -12,7 +13,7 @@ package deuxiemeVersionArendre;
  */
 
 import java.util.HashMap;
-import java.util.Stack;
+
 import java.io.File;
 import java.util.Scanner;
 import java.io.PrintWriter;
@@ -21,20 +22,18 @@ import java.io.FileNotFoundException;
 public class GameEngine
 {
     private Parser        aParser;
-    private Room          aCurrentRoom;
     private UserInterface aGui;
-    private Stack<Room>   aAncienneRoom;
     private HashMap<String,Room> aEnsembleRoom;
+    private Player         aPlayer;
 
     /**
      * Constructor for objects of class GameEngine
      */
     public GameEngine()
     {
-
+        this.aPlayer = new Player("nom du joueur"); 
         this.aParser = new Parser();
         this.aEnsembleRoom = new HashMap<String,Room>();
-        this.aAncienneRoom = new Stack<Room>();
         this.createRooms();
     }
 
@@ -56,8 +55,8 @@ public class GameEngine
         this.aGui.println( "Tape 'help' si tu en a besoin !" );
         this.aGui.print( "\n" );
         printLocationInfo();
-        if ( this.aCurrentRoom.getImageName() != null )
-            this.aGui.showImage( this.aCurrentRoom.getImageName() );
+        if ( this.aPlayer.getCurrentRoom().getImageName() != null )
+            this.aGui.showImage( this.aPlayer.getCurrentRoom().getImageName() );
     }
 
     /**
@@ -89,10 +88,11 @@ public class GameEngine
         vMaisonItemRue2.setExits("up", vRueJaponaise2);
 
         // Attribution des Items
-        vRestaurantDebut.addItem("potion","Potion de vie",0.1,"Cet item vous redonne de la vie",20);
-        vRestaurantDebut.addItem("eau","Eau Sacré",0.1,"Cet item vous redonne de la vie",5);
+        vRestaurantDebut.addItem("potion","Potion de vie",10,"Cet item vous redonne de la vie",20);
+        vRestaurantDebut.addItem("eau","Eau Sacré",5,"Cet item vous redonne de la vie",5);
+        vRestaurantDebut.addItem("magicCookie","Magic Cookie",10,"Cet item augemente le poids maximal que vous pouvez porter",0);
 
-        vMaisonItemRue2.addItem("couteau","Couteau de cuisine du senpai : Roi des poulpes", 0.2,"Cet Item vous donne une nouvelle attaque",0);
+        vMaisonItemRue2.addItem("couteau","Couteau de cuisine du senpai : Roi des poulpes", 20,"Cet Item vous donne une nouvelle attaque",0);
 
         // creation hashMap de l'ensemble des room disponibles
         this.aEnsembleRoom.put("interieur Restaurant", vRestaurantDebut);
@@ -103,7 +103,7 @@ public class GameEngine
         this.aEnsembleRoom.put("maison item 1", vMaisonItemRue2);
 
         //initialiser le lieu courant 
-        this.aCurrentRoom = vRestaurantDebut;
+        this.aPlayer.move(vRestaurantDebut);
         //this.aAncienneRoom = this.aCurrentRoom;
     }
 
@@ -130,11 +130,19 @@ public class GameEngine
         else if ( vCommandWord.equals( "look" ) )
             this.look(vCommand);
         else if ( vCommandWord.equals( "eat" ) )
-            this.eat();
+            this.eat(vCommand);
         else if ( vCommandWord.equals( "back" ) )
             this.back(vCommand);
         else if ( vCommandWord.equals( "test" ) )
             this.test(vCommand);
+        else if ( vCommandWord.equals( "take" ) )
+            this.take(vCommand);
+        else if (vCommandWord.equals("items"))
+            this.inventaire();
+        else if (vCommandWord.equals("status"))
+            this.status();
+        else if ( vCommandWord.equals( "drop" ) )
+            this.drop(vCommand);
         else if ( vCommandWord.equals( "quit" ) ) {
             if ( vCommand.hasSecondWord() )
                 this.aGui.println( "Quit what?" );
@@ -174,18 +182,15 @@ public class GameEngine
         }
 
         String vDirection = pCommand.getSecondWord();
-
-        // Try to leave current room.
-        Room vNextRoom = this.aCurrentRoom.getExit( vDirection );
+        Room vNextRoom = this.aPlayer.getCurrentRoom().getExit( vDirection );
 
         if ( vNextRoom == null )
             this.aGui.println( "Impossible d'aller dans cette direction" );
         else {
-            this.aAncienneRoom.add(this.aCurrentRoom);
-            this.aCurrentRoom = vNextRoom;
+            this.aPlayer.move(vNextRoom);
             printLocationInfo();
-            if ( this.aCurrentRoom.getImageName() != null )
-                this.aGui.showImage( this.aCurrentRoom.getImageName() );
+            if ( this.aPlayer.getCurrentRoom().getImageName() != null )
+                this.aGui.showImage( this.aPlayer.getCurrentRoom().getImageName() );
         }
     }
 
@@ -212,14 +217,47 @@ public class GameEngine
     private void back(final Command pCommand){
         if (pCommand.hasSecondWord())
             this.aGui.println("Retourner ou ?");
-        else if(this.aAncienneRoom.empty())
-            this.aGui.println("Vous étes au début !! ");
         else {
-            this.aCurrentRoom = this.aAncienneRoom.pop();
+            this.aPlayer.backPlayer();
             this.printLocationInfo();
-            if ( this.aCurrentRoom.getImageName() != null )
-                this.aGui.showImage( this.aCurrentRoom.getImageName() );
+            if ( this.aPlayer.getCurrentRoom().getImageName() != null )
+                this.aGui.showImage( this.aPlayer.getCurrentRoom().getImageName() );
         }
+    }
+
+    private void take(final Command pCommand){
+        if(!pCommand.hasSecondWord())  
+            this.aGui.println("Prendre quoi ?");
+        else{
+            String vItemTake = pCommand.getSecondWord();
+            if(this.aPlayer.getCurrentRoom().getItem(vItemTake) != null){
+                if (!this.aPlayer.canBeTake(vItemTake)) {
+                    this.aGui.println("L'item est trop lord pour que vous puissiez le prendre");
+                    return;
+                }
+                this.aPlayer.playerTake(vItemTake);
+                this.aGui.println("Vous avez bien pris l'Item."); 
+            }
+            else{
+                this.aGui.println("Cet objet n'est pas présent dans cette piece!");
+            }
+        }
+    }
+
+    private void drop(final Command pCommand){
+        if(!pCommand.hasSecondWord())   this.aGui.println("Enlever quoi ?");
+        else{     
+            String vItemDrop = pCommand.getSecondWord();
+            if(this.aPlayer.getItem(vItemDrop) != null){
+                this.aPlayer.playerDrop(vItemDrop);
+                this.aGui.println("L'item a bien été déposé.");
+            }
+            else this.aGui.println("L'Item que vous voulez déposer n'existe pas dans votre inventaire.");
+        }
+    }
+
+    private void inventaire(){
+        this.aGui.println(this.aPlayer.getItemsName());
     }
 
     private void endGame()
@@ -231,22 +269,36 @@ public class GameEngine
     private void look(final Command pCommand)
     {
         if(!pCommand.hasSecondWord()){
-            this.aGui.println(this.aCurrentRoom.getLongDescription());
+            this.aGui.println(this.aPlayer.getCurrentRoom().getLongDescription());
         } else{
             String vSecondWord = pCommand.getSecondWord();
-            this.aGui.println(this.aCurrentRoom.getItemDescription(vSecondWord));
+            this.aGui.println(this.aPlayer.getCurrentRoom().getItemDescription(vSecondWord));
         }
     }
 
-    private void eat()
+    private void eat(final Command pCommand)
     {
-        this.aGui.println("Vous avez mangé. Vous n'avez plus fain");
+        if(pCommand.hasSecondWord()){
+            String vItemName = pCommand.getSecondWord();
+            if(this.aPlayer.getItem(vItemName) != null)
+                if(vItemName.equals("magicCookie") || vItemName.equals("potion")){
+                    this.aPlayer.playerEat(vItemName);
+                    this.aGui.println("Vous avez consomé votre Item");
+                }else 
+                    this.aGui.println("Vous ne pouvez pas consomer cette Item");
+            else this.aGui.println("Cette Item n'est pas dans votre inventaire !");
+        }else
+            this.aGui.println("Vous avez mangé. Vous n'avez plus fain");
+    }
+
+    private void status(){
+        this.aGui.println(this.aPlayer.playerStatus());
     }
 
     private void printLocationInfo(){
 
         //afficher le lieu courant
-        this.aGui.println( this.aCurrentRoom.getLongDescription());
+        this.aGui.println( this.aPlayer.getCurrentRoom().getLongDescription());
     }
 
 }
